@@ -87,10 +87,6 @@ void PM_PlayerTouch( playermove_t *pmove, edict_t *pEntity )
 	// touch other objects
 	for( int i = 0; i < pmove->numtouch; i++ )
 	{
-		// never touch the objects when "playersonly" is active
-		if( i == MAX_PHYSENTS || FBitSet( gpGlobals->serverflags, 2 ))
-			break;
-
 		pmtrace_t *pmtrace = &pmove->touchindex[i];
 		edict_t *pTouch = INDEXENT( pmove->physents[pmtrace->ent].info );
 		pr_entvars_t *pevTouch = (pr_entvars_t *)GET_PRIVATE( pTouch );

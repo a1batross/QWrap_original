@@ -90,7 +90,6 @@ typedef struct
 	int	fEnabled;
 	int	fPlayLooping;
 	float	cdvolume;
-	//BYTE 	remap[100];
 	int	fCDRom;
 	int	fPlayTrack;
 } CDStatus;
@@ -106,7 +105,7 @@ typedef struct enginefuncs_s
 	int	(*pfnModelIndex)( const char *m );
 	int	(*pfnModelFrames)( int modelIndex );
 	void	(*pfnSetSize)( edict_t *e, const float *rgflMin, const float *rgflMax );
-	void	(*pfnChangeLevel)( const char *s1, const char *s2 );
+	void	(*pfnChangeLevel)( char* s1, char* s2 );
 	void	(*pfnGetSpawnParms)( edict_t *ent );
 	void	(*pfnSaveSpawnParms)( edict_t *ent );
 	float	(*pfnVecToYaw)( const float *rgflVector );
@@ -139,9 +138,9 @@ typedef struct enginefuncs_s
 	const char *(*pfnTraceTexture)( edict_t *pTextureEntity, const float *v1, const float *v2 );
 	void	(*pfnTraceSphere)( const float *v1, const float *v2, int fNoMonsters, float radius, edict_t *pentToSkip, TraceResult *ptr );
 	void	(*pfnGetAimVector)( edict_t* ent, float speed, float *rgflReturn );
-	void	(*pfnServerCommand)( const char *str );
+	void	(*pfnServerCommand)( const char* str );
 	void	(*pfnServerExecute)( void );
-	void	(*pfnClientCommand)( edict_t* pEdict, const char *szFmt, ... );
+	void	(*pfnClientCommand)( edict_t* pEdict, char* szFmt, ... );
 	void	(*pfnParticleEffect)( const float *org, const float *dir, float color, float count );
 	void	(*pfnLightStyle)( int style, const char* val );
 	int	(*pfnDecalIndex)( const char *name );
@@ -212,7 +211,7 @@ typedef struct enginefuncs_s
 	void	(*pfnSetClientKeyValue)( int clientIndex, char *infobuffer, char *key, char *value );
 	int	(*pfnIsMapValid)( char *filename );
 	void	(*pfnStaticDecal)( const float *origin, int decalIndex, int entityIndex, int modelIndex );
-	int	(*pfnPrecacheGeneric)( char *s );
+	int	(*pfnPrecacheGeneric)( const char *s );
 	int	(*pfnGetPlayerUserId)( edict_t *e ); // returns the server assigned userid for this player.  useful for logging frags, etc.  returns -1 if the edict couldn't be found in the list of clients
 	void	(*pfnBuildSoundMsg)( edict_t *entity, int channel, const char *sample, /*int*/float volume, float attenuation, int fFlags, int pitch, int msg_dest, int msg_type, const float *pOrigin, edict_t *ed );
 	int	(*pfnIsDedicatedServer)( void );			// is this a dedicated server?
@@ -259,20 +258,6 @@ typedef struct enginefuncs_s
 	qboolean	(*pfnVoice_SetClientListening)(int iReceiver, int iSender, qboolean bListen);
 
 	const char *(*pfnGetPlayerAuthId)		( edict_t *e );
-
-	void	*(*pfnSequenceGet)( const char *fileName, const char *entryName );
-	void	*(*pfnSequencePickSentence)( const char *groupName, int pickMethod, int *picked );
-	int	(*pfnGetFileSize)( char *filename );
-	unsigned int (*pfnGetApproxWavePlayLen)( const char *filepath );
-	int	(*pfnIsCareerMatch)( void );
-	int	(*pfnGetLocalizedStringLength)( const char *label );
-	void	(*pfnRegisterTutorMessageShown)( int mid );
-	int	(*pfnGetTimesTutorMessageShown)( int mid );
-	void	(*pfnProcessTutorMessageDecayBuffer)( int *buffer, int bufferLength );
-	void	(*pfnConstructTutorMessageDecayBuffer)( int *buffer, int bufferLength );
-	void	(*pfnResetTutorMessageDecayData)( void );
-	void	(*pfnQueryClientCvarValue)( const edict_t *player, const char *cvarName );
-	void	(*pfnQueryClientCvarValue2)( const edict_t *player, const char *cvarName, int requestID );
 } enginefuncs_t;
 // ONLY ADD NEW FUNCTIONS TO THE END OF THIS STRUCT.  INTERFACE VERSION IS FROZEN AT 138
 	
@@ -288,36 +273,32 @@ typedef struct KeyValueData_s
 
 typedef struct
 {
-	char		mapName[32];
-	char		landmarkName[32];
-	edict_t		*pentLandmark;
-	vec3_t		vecLandmarkOrigin;
+	char	mapName[32];
+	char	landmarkName[32];
+	edict_t	*pentLandmark;
+	vec3_t	vecLandmarkOrigin;
 } LEVELLIST;
-#define MAX_LEVEL_CONNECTIONS	16		// These are encoded in the lower 16bits of ENTITYTABLE->flags
 
 typedef struct 
 {
-	int		id;		// Ordinal ID of this entity (used for entity <--> pointer conversions)
-	edict_t		*pent;		// Pointer to the in-game entity
+	int	id;		// Ordinal ID of this entity (used for entity <--> pointer conversions)
+	edict_t	*pent;		// Pointer to the in-game entity
 
-	int		location;		// Offset from the base data of this entity
-	int		size;		// Byte size of this entity's data
-	int		flags;		// This could be a short -- bit mask of transitions that this entity is in the PVS of
-	string_t		classname;	// entity class name
+	int	location;		// Offset from the base data of this entity
+	int	size;		// Byte size of this entity's data
+	int	flags;		// This could be a short -- bit mask of transitions that this entity is in the PVS of
+	string_t	classname;	// entity class name
 
 } ENTITYTABLE;
+
+#define MAX_LEVEL_CONNECTIONS		16		// These are encoded in the lower 16bits of ENTITYTABLE->flags
 
 #define FENTTABLE_PLAYER		0x80000000
 #define FENTTABLE_REMOVED		0x40000000
 #define FENTTABLE_MOVEABLE		0x20000000
 #define FENTTABLE_GLOBAL		0x10000000
 
-typedef struct saverestore_s SAVERESTOREDATA;
-
-#ifdef _WIN32
-typedef 
-#endif
-struct saverestore_s
+typedef struct saverestore_s
 {
 	char		*pBaseData;		// Start of all entity save data
 	char		*pCurrentData;		// Current buffer pointer for sequential access
@@ -338,12 +319,7 @@ struct saverestore_s
 	vec3_t		vecLandmarkOffset;		// for landmark transitions
 	float		time;
 	char		szCurrentMapName[32];	// To check global entities
-
-} 
-#ifdef _WIN32
-SAVERESTOREDATA 
-#endif
-;
+} SAVERESTOREDATA;
 
 typedef enum _fieldtypes
 {
@@ -380,8 +356,10 @@ typedef enum _fieldtypes
 #define DEFINE_ENTITY_GLOBAL_FIELD(name,fieldtype)	_FIELD(entvars_t, name, fieldtype, 1, FTYPEDESC_GLOBAL )
 #define DEFINE_GLOBAL_FIELD(type,name,fieldtype)		_FIELD(type, name, fieldtype, 1, FTYPEDESC_GLOBAL )
 
-
-#define FTYPEDESC_GLOBAL	0x0001			// This field is masked for global entity save/restore
+#define FTYPEDESC_GLOBAL		0x0001		// This field is masked for global entity save/restore
+#define FTYPEDESC_SAVE		0x0002		// This field is saved to disk
+#define FTYPEDESC_KEY		0x0004		// This field can be requested and written to by string name at load time
+#define FTYPEDESC_FUNCTIONTABLE	0x0008		// This is a table entry for a member function pointer
 
 typedef struct 
 {
@@ -448,7 +426,7 @@ typedef struct
 	void	(*pfnPM_Init)( struct playermove_s *ppmove );
 	char	(*pfnPM_FindTextureType)( char *name );
 	void	(*pfnSetupVisibility)( struct edict_s *pViewEntity, struct edict_s *pClient, unsigned char **pvs, unsigned char **pas );
-	void	(*pfnUpdateClientData) ( edict_t *ent, int sendweapons, struct clientdata_s *cd );
+	void	(*pfnUpdateClientData) ( struct edict_s *ent, int sendweapons, struct clientdata_s *cd );
 	int	(*pfnAddToFullPack)( struct entity_state_s *state, int e, edict_t *ent, edict_t *host, int hostflags, int player, unsigned char *pSet );
 	void	(*pfnCreateBaseline)( int player, int eindex, struct entity_state_s *baseline, struct edict_s *entity, int playermodelindex, vec3_t player_mins, vec3_t player_maxs );
 	void	(*pfnRegisterEncoders)( void );
@@ -490,8 +468,6 @@ typedef struct
 	void	(*pfnOnFreeEntPrivateData)( edict_t *pEnt );
 	void	(*pfnGameShutdown)(void);
 	int	(*pfnShouldCollide)( edict_t *pentTouched, edict_t *pentOther );
-	void	(*pfnCvarValue)( const edict_t *pEnt, const char *value ); 
-	void	(*pfnCvarValue2)( const edict_t *pEnt, int requestID, const char *cvarName, const char *value );
 } NEW_DLL_FUNCTIONS;
 typedef int	(*NEW_DLL_FUNCTIONS_FN)( NEW_DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
 

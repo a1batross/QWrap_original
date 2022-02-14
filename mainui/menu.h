@@ -101,7 +101,7 @@ inline void Draw_Pic( int x, int y, HIMAGE pic )
 
 inline bool Con_ToggleConsole_f( void )
 {
-	if( Cvar_GetValue( "developer" ) > 0.0f )
+	if( gpGlobals->allow_console )
 	{
 		UI_SetActiveMenu( 0 );
 		engfuncs.pfnSetKeyDest( KEY_CONSOLE );

@@ -410,7 +410,7 @@ void M_Main_Key (int key)
 	switch (key)
 	{
 	case K_ESCAPE:
-		if( CL_IsActive() || Cvar_GetValue( "developer" ) > 0.0f )
+		if( CL_IsActive() || gpGlobals->allow_console )
 		{
 			UI_SetActiveMenu( 0 );
 			m_state = m_none;
@@ -3506,7 +3506,8 @@ void M_Mods_Key( int k )
 		{
 			modlow--;
 		}
-		
+		if( modlow < 0 )
+			modlow = 0;		
 		break;
 
 	case K_DOWNARROW:

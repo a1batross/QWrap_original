@@ -828,7 +828,7 @@ Returns the descriptive name of this .dll.  E.g., Half-Life, or Team Fortress 2
 */
 const char *GetGameDescription()
 {
-	return "Quake Wrapper v0.53 beta";
+	return "Quake Wrapper v0.6";
 }
 
 /*
@@ -948,10 +948,14 @@ we could also use the pas/ pvs that we set in SetupVisibility, if we wanted to. 
 */
 int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *host, int hostflags, int player, unsigned char *pSet )
 {
+	pr_entvars_t *ev;
 	int	i;
 
 	if (!ED_UpdateEdictFields( ent ))
 		return 0;
+
+	ev = (pr_entvars_t *)GET_PRIVATE( ent );
+	if( ev ) ClearBits( ev->effects, EF_MUZZLEFLASH );
 
 	// don't send if flagged for NODRAW and it's not the host getting the message
 	if ( ( ent->v.effects == EF_NODRAW ) &&
@@ -1621,14 +1625,4 @@ int ShouldCollide( edict_t *pentTouched, edict_t *pentOther )
 //	ED_UpdateEdictFields( pentOther );
 
 	return 1;
-}
-
-void CvarValue( const edict_t *pEnt, const char *value ) 
-{
-//	ALERT( at_console, "ReadingCvarValue: [%i], value %s\n", ENTINDEX( (edict_t *)pEnt ), value );
-}
-
-void CvarValue2( const edict_t *pEnt, int requestID, const char *cvarName, const char *value )
-{
-//	ALERT( at_console, "ReadingCvarValue: [%i], id %d, cvar %s, value %s\n", ENTINDEX( (edict_t *)pEnt ), requestID, cvarName, value );
 }

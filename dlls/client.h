@@ -32,7 +32,7 @@ extern void DispatchBlocked( edict_t *pentBlocked, edict_t *pentOther );
 extern void DispatchSave( edict_t *pent, SAVERESTOREDATA *pSaveData );
 extern int  DispatchRestore( edict_t *pent, SAVERESTOREDATA *pSaveData, int globalEntity );
 extern void DispatchObjectCollisionBox( edict_t *pent );
-extern void DispatchCreateEntitiesInRestoreList( SAVERESTOREDATA *pSaveData, int createPlayers );
+extern void DispatchCreateEntitiesInRestoreList( SAVERESTOREDATA *pSaveData, int levelMask, qboolean create_world );
 extern void SaveWriteFields( SAVERESTOREDATA *pSaveData, const char *pname, void *pBaseData, TYPEDESCRIPTION *pFields, int fieldCount );
 extern void SaveReadFields( SAVERESTOREDATA *pSaveData, const char *pname, void *pBaseData, TYPEDESCRIPTION *pFields, int fieldCount );
 extern void SaveGlobalState( SAVERESTOREDATA *pSaveData );
@@ -89,8 +89,5 @@ extern int AllowLagCompensation( void );
 extern int ShouldCollide( edict_t *pentTouched, edict_t *pentOther );
 
 extern void OnFreeEntPrivateData( edict_s *pEdict );
-
-extern void CvarValue( const edict_t *pEnt, const char *value );
-extern void CvarValue2( const edict_t *pEnt, int requestID, const char *cvarName, const char *value );
 
 #endif // CLIENT_H

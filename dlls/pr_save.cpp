@@ -89,23 +89,30 @@ int DispatchRestore( edict_t *pent, SAVERESTOREDATA *pSaveData, int globalEntity
 	return 0;
 }
 
-void DispatchCreateEntitiesInRestoreList( SAVERESTOREDATA *pSaveData, int createPlayers )
+void DispatchCreateEntitiesInRestoreList( SAVERESTOREDATA *pSaveData, int levelMask, qboolean create_world )
 {
+	ENTITYTABLE *pTable;
 	edict_t *pent;
 
 	// create entity list
 	for( int i = 0; i < pSaveData->tableCount; i++ )
 	{
-		ENTITYTABLE *pEntInfo = &pSaveData->pTable[i];
+		pTable = &pSaveData->pTable[i];
+		pent = NULL;
 
-		if( pEntInfo->classname != iStringNull && pEntInfo->size && !( pEntInfo->flags & FENTTABLE_REMOVED ))
+		if( pTable->classname != iStringNull && pTable->size && ( !FBitSet( pTable->flags, FENTTABLE_REMOVED ) || !create_world ))
 		{
-			if( pEntInfo->id == 0 ) // worldspawn
+			int	active = FBitSet( pTable->flags, levelMask ) ? 1 : 0;
+
+			if( create_world )
+				active = 1;
+
+			if( pTable->id == 0 && create_world ) // worldspawn
 			{
-				pent = INDEXENT( pEntInfo->id );
+				pent = INDEXENT( pTable->id );
 
 				pr_entvars_t *pev = (pr_entvars_t *)ALLOC_PRIVATE( pent, pr.progs->entityfields * 4 );
-				pev->classname = pEntInfo->classname;
+				pev->classname = pTable->classname;
 
 				// SV_InitEdict
 				memset( &pent->v, 0, sizeof( entvars_t ));
@@ -113,42 +120,33 @@ void DispatchCreateEntitiesInRestoreList( SAVERESTOREDATA *pSaveData, int create
 				pent->free = false;
 				pr.loadgame = true;
 			}
-			else if(( pEntInfo->id > 0 ) && ( pEntInfo->id <= gpGlobals->maxClients ))
+			else if(( pTable->id > 0 ) && ( pTable->id <= gpGlobals->maxClients ))
 			{
-				if(!( pEntInfo->flags & FENTTABLE_PLAYER ))
-				{
+				if( !FBitSet( pTable->flags, FENTTABLE_PLAYER ))
 					ALERT( at_warning, "ENTITY IS NOT A PLAYER: %d\n", i );
-				}
 
-				edict_t *ed = INDEXENT( pEntInfo->id );
+				edict_t *ed = INDEXENT( pTable->id );
 
-				if( ed && createPlayers )
+				// create the player
+				if( active && ed != NULL )
 				{
 					// create the player
 					pr_entvars_t *pev = (pr_entvars_t *)ALLOC_PRIVATE( ed, pr.progs->entityfields * 4 );
-					pev->classname = pEntInfo->classname;
+					pev->classname = pTable->classname;
 					pent = ed;
 				}
-				else
-				{
-					pent = NULL;
-				}
 			}
-			else
+			else if( active )
 			{
 				pent = CREATE_ENTITY();
 
 				// progs have constant class size for each entity
 				pr_entvars_t *pev = (pr_entvars_t *)ALLOC_PRIVATE( pent, pr.progs->entityfields * 4 );
-				pev->classname = pEntInfo->classname;
+				pev->classname = pTable->classname;
 			}
+		}
 
-			pEntInfo->pent = pent;
-		}
-		else
-		{
-			pEntInfo->pent = NULL; // invalid
-		}
+		pTable->pent = pent;
 	}
 }
 

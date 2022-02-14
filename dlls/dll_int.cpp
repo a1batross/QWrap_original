@@ -97,8 +97,6 @@ NEW_DLL_FUNCTIONS gNewDLLFunctions =
 	OnFreeEntPrivateData,	// pfnOnFreeEntPrivateData
 	GameDLLShutdown,		// pfnGameShutdown
 	ShouldCollide,		// pfnShouldCollide
-	CvarValue,		// pfnCvarValue
-	CvarValue2,		// pfnCvarValue2
 };
 
 int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interfaceVersion )
@@ -204,4 +202,6 @@ void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, globalvars_t
 	gpGlobals = pGlobals;
 
 	g_iXashEngineBuildNumber = CVAR_GET_FLOAT( "build" ); // 0 for old builds or GoldSrc
+	if( g_iXashEngineBuildNumber <= 0 )
+		g_iXashEngineBuildNumber = (int)CVAR_GET_FLOAT( "buildnum" );
 }

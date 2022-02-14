@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "client"=".\cl_dll\cl_dll.dsp" - Package Owner=<4>
+Project: "client"=.\cl_dll\cl_dll.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -15,7 +15,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "progs"=".\dlls\progs.dsp" - Package Owner=<4>
+Project: "mainui"=.\mainui\mainui.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -27,7 +27,19 @@ Package=<4>
 
 ###############################################################################
 
-Project: "mainui"=".\mainui\mainui.dsp" - Package Owner=<4>
+Project: "progs"=.\dlls\progs.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "q1mv"=.\utils\q1mv\q1mv.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

@@ -1151,6 +1151,9 @@ void PF_precache_file( void )
 		return;
 	}
 
+	// g-cont. Hey, now i'm have PRECACHE_FILE :-)
+	PR_ValidateString( G_STRING( OFS_PARM0 ));
+	PRECACHE_FILE( G_STRING( OFS_PARM0 ));
 	G_INT( OFS_RETURN ) = G_INT( OFS_PARM0 );
 }
 
